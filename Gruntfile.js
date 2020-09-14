@@ -5,7 +5,7 @@ module.exports = function(grunt) {
 			start: {
 				options: {
 					platforms: ["win32", "win64"],
-					dest: "src/ffmpeg"
+					dest: "test/ffmpeg"
 				}
 			}
 		}
