@@ -53,7 +53,7 @@ module.exports = function(grunt){
 				const stopTime = paramsBar.stopTime || Date.now();
 				const elapsedTime = formatTime(Math.round((stopTime - paramsBar.startTime)/1000));
 				
-				var barStr = _colors.white('|') + _colors.cyan(bar + ' ' + autopadding(percentage, 3) + '%') + _colors.white('|') +  _colors.bgCyan(_colors.white(" " + autopaddingVal(formatValue, total, optionsBar) + '/' + formatTotal + ' ')) + _colors.white('|') + "  " + elapsedTime;
+				var barStr = _colors.white('|') + _colors.cyan(bar + ' ' + autopadding(percentage, 3) + '%') + _colors.white('|') +  _colors.bgCyan(_colors.white(" " + autopaddingVal(formatValue, total, optionsBar) + ' / ' + formatTotal + ' ')) + _colors.white('|') + "  " + elapsedTime;
 				return barStr;
 				//+ _colors.yellow(' {percentage}% ') +  _colors.blue('{value}/{total} bytes'),
 			};
