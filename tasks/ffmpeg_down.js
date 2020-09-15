@@ -14,7 +14,49 @@ module.exports = function(grunt){
 			error = false,
 			filesArr = [];
 			
-		const cliProgress = require('cli-progress');
+		const cliProgress = require('cli-progress'),
+			formatTime = function(value){
+
+				// leading zero padding
+				function autopadding(v){
+					return ("0" + v).slice(-2);
+				}
+				var s = autopadding(Math.round(value % 60));
+				var m = autopadding(Math.round((value / 60) % 60));
+				var h  = autopadding(Math.round((value / 360) % 24));
+				return h + ":" + m + ":" + s
+			},
+			autopaddingVal = function (value, length, opt){
+				return (opt.autopaddingChar + value).slice(-length);
+			},
+			formatBytes = function(bytes, decimals = 2) {
+				if (bytes === 0) return '0 Bt';
+				const k = 1024;
+				const dm = decimals < 0 ? 0 : decimals;
+				const sizes = ['Bt', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+				const i = Math.floor(Math.log(bytes) / Math.log(k));
+				return parseFloat(bytes / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
+			},
+			formatBar = function(optionsBar, paramsBar, payloadBar){
+				function autopadding(value, length){
+					return (optionsBar.autopaddingChar + value).slice(-length);
+				}
+				const completeSize = Math.round(paramsBar.progress * optionsBar.barsize);
+				const incompleteSize = optionsBar.barsize - completeSize;
+				const bar = optionsBar.barCompleteString.substr(0, completeSize) +
+						optionsBar.barGlue +
+						optionsBar.barIncompleteString.substr(0, incompleteSize);
+				const percentage =  Math.floor(paramsBar.progress * 100) + '';
+				const formatValue = formatBytes(paramsBar.value);
+				const formatTotal = formatBytes(paramsBar.total);
+				const total = formatTotal.length;// params
+				const stopTime = paramsBar.stopTime || Date.now();
+				const elapsedTime = formatTime(Math.round((stopTime - paramsBar.startTime)/1000));
+				
+				var barStr = _colors.white('|') + _colors.cyan(bar + ' ' + autopadding(percentage, 3) + '%') + _colors.white('|') +  _colors.bgCyan(_colors.white(" " + autopaddingVal(formatValue, total, optionsBar) + '/' + formatTotal + ' ')) + _colors.white('|') + "  " + elapsedTime;
+				return barStr;
+				//+ _colors.yellow(' {percentage}% ') +  _colors.blue('{value}/{total} bytes'),
+			};
 		
 		temp.track();
 		if(!options.platforms){
@@ -99,9 +141,10 @@ module.exports = function(grunt){
 					bar = new cliProgress.SingleBar({
 						stopOnComplete: true,
 						hideCursor: true,
-						barsize: 50
+						autopadding: true,
+						barsize: 20
 					},{
-						format: _colors.white('|') + _colors.cyan('{bar}') + _colors.white('|  {percentage}% {value}/{total} bytes'),
+						format: formatBar,
 						barCompleteChar: '\u2588',
 						barIncompleteChar: '\u2592'
 					});
@@ -125,21 +168,28 @@ module.exports = function(grunt){
 					var files = [];
 					let dest = path.normalize(path.join(options.dest, obj.platform)),
 						zipFile = stream.path;
+					grunt.log.writeln("Unzip: " + obj.name + " to " + dest);
 					new DecompressZip(zipFile).on('error', function(err){
 						reject(err);
 					}).on('extract', function(log) {
 						files.forEach(function(file) {
-							fs.chmodSync(path.join(dest, file.path), file.mode);
+							var pth = path.join(dest, file.path);
+							fs.chmodSync(pth, file.mode);
 						});
-						grunt.log.writeln("Unzip: " + obj.name + " to " + dest + "\n");
 						try{fs.unlinkSync(zipFile);}catch(e){}
 						resolve();
+					}).on('progress', function(index, length){
+						//console.log(index, length);
 					}).extract({
 						path: dest,
 						filter: function(entry) {
+							var pth = path.join(dest, entry.path),
+								mode = entry.mode.toString(8);
+							grunt.log.writeln("Extract: " + pth);
+							grunt.log.writeln("Change mode file: " + entry.path + " -> " + mode);
 							files.push({
 								path: entry.path,
-								mode: entry.mode.toString(8)
+								mode: mode
 							});
 							return true;
 						}
