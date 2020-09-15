@@ -18,6 +18,7 @@
 	"homepage": "https://github.com/STUDIONIONS/grunt-nwjs-ffmpeg-download#readme",
 	"dependencies": {
 		"cli-progress": "^3.8.2",
+		"colors": "^1.4.0",
 		"decompress-zip": "^0.2.2",
 		"del": "^5.1.0",
 		"grunt": "^1.2.1",

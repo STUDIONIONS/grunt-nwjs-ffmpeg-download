@@ -4,6 +4,7 @@ module.exports = function(grunt){
 			fs = require('fs'),
 			temp = require('temp'),
 			request = require('request'),
+			_colors = require('colors'),
 			DecompressZip = require('decompress-zip'),
 			del = require('del'),
 			done = this.async(),
@@ -87,7 +88,7 @@ module.exports = function(grunt){
 		}
 		function getZipFIle(obj){
 			return new Promise(function(resolve, reject){
-				grunt.log.writeln('Download: ' + obj.name);
+				grunt.log.writeln('\nDownload: ' + obj.name);
 				var rq = request(obj.url, {
 						headers: {
 							"User-Agent": "Awesome-Octocat-App"
@@ -97,12 +98,13 @@ module.exports = function(grunt){
 					tick = 0,
 					bar = new cliProgress.SingleBar({
 						stopOnComplete: true,
-						clearOnComplete: true
-					}, cliProgress.Presets.shades_grey/*{
-						format: '[' + _colors.cyan('{bar}') + ']  {percentage}% | Speed: {speed} kbit | ETA: {eta}s',
+						hideCursor: true,
+						barsize: 50
+					},{
+						format: _colors.white('|') + _colors.cyan('{bar}') + _colors.white('|  {percentage}% {value}/{total} bytes'),
 						barCompleteChar: '\u2588',
-						barIncompleteChar: '\u2022'
-					}*/);
+						barIncompleteChar: '\u2592'
+					});
 				rq.on('error', function(err) {
 					reject(err);
 				});
@@ -120,7 +122,6 @@ module.exports = function(grunt){
 				var stream = temp.createWriteStream();
 				stream.on('close', function() {
 					bar.update(len);
-					//bar.stop();
 					var files = [];
 					let dest = path.normalize(path.join(options.dest, obj.platform)),
 						zipFile = stream.path;
@@ -130,7 +131,7 @@ module.exports = function(grunt){
 						files.forEach(function(file) {
 							fs.chmodSync(path.join(dest, file.path), file.mode);
 						});
-						grunt.log.writeln("Unzip: " + obj.name + " to " + dest);
+						grunt.log.writeln("Unzip: " + obj.name + " to " + dest + "\n");
 						try{fs.unlinkSync(zipFile);}catch(e){}
 						resolve();
 					}).extract({
