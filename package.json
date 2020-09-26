@@ -16,6 +16,11 @@
 		"url": "https://github.com/STUDIONIONS/grunt-nwjs-ffmpeg-download/issues"
 	},
 	"homepage": "https://github.com/STUDIONIONS/grunt-nwjs-ffmpeg-download#readme",
+	"bundleDependencies": false,
+	"deprecated": false,
+	"engines": {
+		"node": ">= 0.10.0"
+	},
 	"dependencies": {
 		"cli-progress": "^3.8.2",
 		"colors": "^1.4.0",
