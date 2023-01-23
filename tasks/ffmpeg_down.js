@@ -87,7 +87,7 @@ module.exports = function(grunt){
 		});
 		function downloadJSON(){
 			return new Promise(function(resolve, reject){
-				var rq = request("https://api.github.com/repos/iteufel/nwjs-ffmpeg-prebuilt/releases/latest", {
+				var rq = request("https://api.github.com/repos/nwjs-ffmpeg-prebuilt/nwjs-ffmpeg-prebuilt/releases/latest", {
 						headers: {
 							"Accept": "application/vnd.github.v3+json",
 							"User-Agent": "Awesome-Octocat-App"
